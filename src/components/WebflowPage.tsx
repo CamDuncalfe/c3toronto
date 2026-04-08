@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 
 interface WebflowPageProps {
   bodyClass: string;
@@ -19,9 +19,37 @@ export function WebflowPage({
 }: WebflowPageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scriptsRan = useRef(false);
+  const styleRef = useRef<HTMLStyleElement | null>(null);
+  const scriptEls = useRef<HTMLScriptElement[]>([]);
 
+  // Activate inline scripts: dangerouslySetInnerHTML renders <script> as
+  // inert text nodes. We must clone each one into a fresh <script> element
+  // so the browser actually evaluates it.
+  const activateScripts = useCallback(() => {
+    if (!containerRef.current) return;
+
+    const inertScripts = containerRef.current.querySelectorAll("script");
+    inertScripts.forEach((old) => {
+      const fresh = document.createElement("script");
+
+      // Copy every attribute (src, type, id, etc.)
+      Array.from(old.attributes).forEach((attr) => {
+        fresh.setAttribute(attr.name, attr.value);
+      });
+
+      // Copy inline code
+      if (old.textContent) {
+        fresh.textContent = old.textContent;
+      }
+
+      // Replace in-place so DOM position is preserved
+      old.parentNode?.replaceChild(fresh, old);
+      scriptEls.current.push(fresh);
+    });
+  }, []);
+
+  // 1. Set body / html attributes
   useEffect(() => {
-    // Set body class and wf attributes
     document.body.className = bodyClass;
     document.documentElement.setAttribute("data-wf-page", wfPage);
     document.documentElement.setAttribute(
@@ -29,12 +57,13 @@ export function WebflowPage({
       "644dc19729bd36f5c52be3e0"
     );
 
-    // Add w-mod-js class
-    document.documentElement.className = document.documentElement.className
-      .replace(/ ?w-mod-js/g, "")
-      .concat(" w-mod-js");
-    if ("ontouchstart" in window) {
-      document.documentElement.className += " w-mod-touch";
+    // Webflow feature-detection classes
+    const root = document.documentElement;
+    if (!root.classList.contains("w-mod-js")) {
+      root.classList.add("w-mod-js");
+    }
+    if ("ontouchstart" in window && !root.classList.contains("w-mod-touch")) {
+      root.classList.add("w-mod-touch");
     }
 
     return () => {
@@ -42,56 +71,55 @@ export function WebflowPage({
     };
   }, [bodyClass, wfPage]);
 
+  // 2. Inject page-level <style> into <head>
   useEffect(() => {
-    // Inject head styles
-    if (headStyles) {
-      const styleEl = document.createElement("style");
-      styleEl.setAttribute("data-page-styles", "true");
-      styleEl.textContent = headStyles;
-      document.head.appendChild(styleEl);
+    if (!headStyles) return;
 
-      return () => {
-        styleEl.remove();
-      };
-    }
+    const el = document.createElement("style");
+    el.setAttribute("data-page-styles", "true");
+    el.textContent = headStyles;
+    document.head.appendChild(el);
+    styleRef.current = el;
+
+    return () => {
+      el.remove();
+      styleRef.current = null;
+    };
   }, [headStyles]);
 
+  // 3. After first render, activate all inline scripts then re-init Webflow
   useEffect(() => {
-    if (!containerRef.current || scriptsRan.current) return;
+    if (scriptsRan.current) return;
     scriptsRan.current = true;
 
-    // Find and execute inline scripts within the rendered HTML
-    const scripts = containerRef.current.querySelectorAll("script");
-    scripts.forEach((oldScript) => {
-      const newScript = document.createElement("script");
-      // Copy attributes
-      Array.from(oldScript.attributes).forEach((attr) => {
-        newScript.setAttribute(attr.name, attr.value);
-      });
-      if (oldScript.textContent) {
-        newScript.textContent = oldScript.textContent;
-      }
-      oldScript.parentNode?.replaceChild(newScript, oldScript);
-    });
+    // Wait a tick so the DOM from dangerouslySetInnerHTML is fully painted
+    const timer = setTimeout(() => {
+      // Activate scripts embedded in the body HTML
+      activateScripts();
 
-    // Run page-specific scripts
-    if (pageScripts) {
-      const scriptEl = document.createElement("script");
-      scriptEl.textContent = pageScripts;
-      document.body.appendChild(scriptEl);
-    }
-
-    // Re-init Webflow if available
-    if (typeof window !== "undefined" && (window as any).Webflow) {
-      try {
-        (window as any).Webflow.destroy();
-        (window as any).Webflow.ready();
-        (window as any).Webflow.require("ix2")?.init();
-      } catch (e) {
-        // Webflow re-init may fail on some pages, that's ok
+      // Run any additional page-level scripts
+      if (pageScripts) {
+        const el = document.createElement("script");
+        el.textContent = pageScripts;
+        document.body.appendChild(el);
+        scriptEls.current.push(el);
       }
-    }
-  }, [pageScripts]);
+
+      // Re-initialize Webflow interactions after scripts are active
+      const w = (window as any).Webflow;
+      if (w) {
+        try {
+          w.destroy();
+          w.ready();
+          w.require?.("ix2")?.init();
+        } catch {
+          // Some pages don't use ix2
+        }
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [activateScripts, pageScripts]);
 
   return (
     <div

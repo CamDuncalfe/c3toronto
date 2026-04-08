@@ -36,14 +36,10 @@ export default function RootLayout({
     <html lang="en" data-wf-site="644dc19729bd36f5c52be3e0">
       <head>
         {/* Webflow CSS */}
-        <link
-          href="/css/webflow.css"
-          rel="stylesheet"
-          type="text/css"
-        />
+        <link href="/css/webflow.css" rel="stylesheet" type="text/css" />
         {/* Splide carousel CSS */}
         <link href="/css/splide.min.css" rel="stylesheet" type="text/css" />
-        {/* Typekit / Adobe Fonts */}
+        {/* Typekit / Adobe Fonts - must load before render */}
         <Script
           src="https://use.typekit.net/bup7jcg.js"
           strategy="beforeInteractive"
@@ -51,17 +47,25 @@ export default function RootLayout({
         <Script id="typekit-load" strategy="beforeInteractive">
           {`try{Typekit.load();}catch(e){}`}
         </Script>
+        {/* jQuery - must load before Webflow and Splide */}
+        <Script src="/js/jquery.min.js" strategy="beforeInteractive" />
       </head>
       <body>
         {children}
 
-        {/* Webflow JS */}
+        {/* Webflow JS (depends on jQuery) */}
         <Script src="/js/webflow.chunk1.js" strategy="afterInteractive" />
         <Script src="/js/webflow.chunk2.js" strategy="afterInteractive" />
         <Script src="/js/webflow.main.js" strategy="afterInteractive" />
 
         {/* Splide carousel JS */}
         <Script src="/js/splide.min.js" strategy="afterInteractive" />
+
+        {/* Podium chat widget */}
+        <Script
+          src="https://connect.podium.com/widget.js#ORG_TOKEN=cbc6b61f-d1b1-4150-8151-c8eb697d6eab"
+          strategy="lazyOnload"
+        />
 
         {/* Mailchimp */}
         <Script
@@ -72,6 +76,7 @@ export default function RootLayout({
 
         {/* Giving widget */}
         <Script
+          id="giving-widget"
           strategy="lazyOnload"
           src="https://give.c3toronto.com/v1/widgets.js"
         />

@@ -20,7 +20,6 @@ export function WebflowPage({
   const containerRef = useRef<HTMLDivElement>(null);
   const scriptsRan = useRef(false);
   const styleRef = useRef<HTMLStyleElement | null>(null);
-  const scriptEls = useRef<HTMLScriptElement[]>([]);
 
   // Activate inline scripts: dangerouslySetInnerHTML renders <script> as
   // inert text nodes. We must clone each one into a fresh <script> element
@@ -37,14 +36,26 @@ export function WebflowPage({
         fresh.setAttribute(attr.name, attr.value);
       });
 
-      // Copy inline code
+      // For inline scripts, we need to handle DOMContentLoaded callbacks.
+      // By the time React mounts, DOMContentLoaded has already fired,
+      // so we unwrap those callbacks to execute immediately.
       if (old.textContent) {
-        fresh.textContent = old.textContent;
+        let code = old.textContent;
+
+        // Replace DOMContentLoaded listeners with immediate invocation
+        // Handles both:
+        //   document.addEventListener('DOMContentLoaded', function() { ... });
+        //   document.addEventListener("DOMContentLoaded", function () { ... });
+        code = code.replace(
+          /document\.addEventListener\(\s*['"]DOMContentLoaded['"]\s*,\s*function\s*\(\s*\)\s*\{/g,
+          "(function() {"
+        );
+
+        fresh.textContent = code;
       }
 
       // Replace in-place so DOM position is preserved
       old.parentNode?.replaceChild(fresh, old);
-      scriptEls.current.push(fresh);
     });
   }, []);
 
@@ -92,20 +103,25 @@ export function WebflowPage({
     if (scriptsRan.current) return;
     scriptsRan.current = true;
 
-    // Wait a tick so the DOM from dangerouslySetInnerHTML is fully painted
+    // Small delay to ensure DOM from dangerouslySetInnerHTML is painted
+    // and that jQuery + Splide + Webflow JS are loaded
     const timer = setTimeout(() => {
       // Activate scripts embedded in the body HTML
       activateScripts();
 
-      // Run any additional page-level scripts
+      // Run any additional page-level scripts (also unwrap DOMContentLoaded)
       if (pageScripts) {
+        let code = pageScripts;
+        code = code.replace(
+          /document\.addEventListener\(\s*['"]DOMContentLoaded['"]\s*,\s*function\s*\(\s*\)\s*\{/g,
+          "(function() {"
+        );
         const el = document.createElement("script");
-        el.textContent = pageScripts;
+        el.textContent = code;
         document.body.appendChild(el);
-        scriptEls.current.push(el);
       }
 
-      // Re-initialize Webflow interactions after scripts are active
+      // Re-initialize Webflow interactions
       const w = (window as any).Webflow;
       if (w) {
         try {
@@ -116,7 +132,7 @@ export function WebflowPage({
           // Some pages don't use ix2
         }
       }
-    }, 100);
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [activateScripts, pageScripts]);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
 
 interface WebflowPageProps {
   bodyClass: string;
@@ -8,6 +8,30 @@ interface WebflowPageProps {
   headStyles: string;
   bodyHtml: string;
   pageScripts: string;
+}
+
+/**
+ * Wait until jQuery and Splide are both available on window,
+ * then call the callback. Polls every 50ms, gives up after 10s.
+ */
+function whenReady(cb: () => void) {
+  const w = window as any;
+  if (w.jQuery && w.Splide) {
+    cb();
+    return;
+  }
+  let elapsed = 0;
+  const interval = setInterval(() => {
+    elapsed += 50;
+    if (w.jQuery && w.Splide) {
+      clearInterval(interval);
+      cb();
+    } else if (elapsed > 10000) {
+      clearInterval(interval);
+      // Run anyway — some pages don't need Splide
+      cb();
+    }
+  }, 50);
 }
 
 export function WebflowPage({
@@ -19,47 +43,8 @@ export function WebflowPage({
 }: WebflowPageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scriptsRan = useRef(false);
-  const styleRef = useRef<HTMLStyleElement | null>(null);
 
-  // Activate inline scripts: dangerouslySetInnerHTML renders <script> as
-  // inert text nodes. We must clone each one into a fresh <script> element
-  // so the browser actually evaluates it.
-  const activateScripts = useCallback(() => {
-    if (!containerRef.current) return;
-
-    const inertScripts = containerRef.current.querySelectorAll("script");
-    inertScripts.forEach((old) => {
-      const fresh = document.createElement("script");
-
-      // Copy every attribute (src, type, id, etc.)
-      Array.from(old.attributes).forEach((attr) => {
-        fresh.setAttribute(attr.name, attr.value);
-      });
-
-      // For inline scripts, we need to handle DOMContentLoaded callbacks.
-      // By the time React mounts, DOMContentLoaded has already fired,
-      // so we unwrap those callbacks to execute immediately.
-      if (old.textContent) {
-        let code = old.textContent;
-
-        // Replace DOMContentLoaded listeners with immediate invocation
-        // Handles both:
-        //   document.addEventListener('DOMContentLoaded', function() { ... });
-        //   document.addEventListener("DOMContentLoaded", function () { ... });
-        code = code.replace(
-          /document\.addEventListener\(\s*['"]DOMContentLoaded['"]\s*,\s*function\s*\(\s*\)\s*\{/g,
-          "(function() {"
-        );
-
-        fresh.textContent = code;
-      }
-
-      // Replace in-place so DOM position is preserved
-      old.parentNode?.replaceChild(fresh, old);
-    });
-  }, []);
-
-  // 1. Set body / html attributes
+  // 1. Set body / html attributes on mount
   useEffect(() => {
     document.body.className = bodyClass;
     document.documentElement.setAttribute("data-wf-page", wfPage);
@@ -68,11 +53,8 @@ export function WebflowPage({
       "644dc19729bd36f5c52be3e0"
     );
 
-    // Webflow feature-detection classes
     const root = document.documentElement;
-    if (!root.classList.contains("w-mod-js")) {
-      root.classList.add("w-mod-js");
-    }
+    if (!root.classList.contains("w-mod-js")) root.classList.add("w-mod-js");
     if ("ontouchstart" in window && !root.classList.contains("w-mod-touch")) {
       root.classList.add("w-mod-touch");
     }
@@ -85,31 +67,51 @@ export function WebflowPage({
   // 2. Inject page-level <style> into <head>
   useEffect(() => {
     if (!headStyles) return;
-
     const el = document.createElement("style");
     el.setAttribute("data-page-styles", "true");
     el.textContent = headStyles;
     document.head.appendChild(el);
-    styleRef.current = el;
-
     return () => {
       el.remove();
-      styleRef.current = null;
     };
   }, [headStyles]);
 
-  // 3. After first render, activate all inline scripts then re-init Webflow
+  // 3. Activate inline scripts after deps are ready
   useEffect(() => {
-    if (scriptsRan.current) return;
+    if (scriptsRan.current || !containerRef.current) return;
     scriptsRan.current = true;
 
-    // Small delay to ensure DOM from dangerouslySetInnerHTML is painted
-    // and that jQuery + Splide + Webflow JS are loaded
-    const timer = setTimeout(() => {
-      // Activate scripts embedded in the body HTML
-      activateScripts();
+    whenReady(() => {
+      const container = containerRef.current;
+      if (!container) return;
 
-      // Run any additional page-level scripts (also unwrap DOMContentLoaded)
+      // Clone every inert <script> into a live one.
+      // dangerouslySetInnerHTML creates script DOM nodes that the browser
+      // won't execute. Replacing them with fresh elements triggers execution.
+      const inertScripts = container.querySelectorAll("script");
+      inertScripts.forEach((old) => {
+        const fresh = document.createElement("script");
+        Array.from(old.attributes).forEach((attr) => {
+          fresh.setAttribute(attr.name, attr.value);
+        });
+
+        if (old.textContent) {
+          let code = old.textContent;
+
+          // DOMContentLoaded has already fired in an SPA. Unwrap those
+          // callbacks so they execute immediately.
+          code = code.replace(
+            /document\.addEventListener\(\s*['"]DOMContentLoaded['"]\s*,\s*function\s*\(\s*\)\s*\{/g,
+            "(function() {"
+          );
+
+          fresh.textContent = code;
+        }
+
+        old.parentNode?.replaceChild(fresh, old);
+      });
+
+      // Run additional page-level scripts
       if (pageScripts) {
         let code = pageScripts;
         code = code.replace(
@@ -121,7 +123,7 @@ export function WebflowPage({
         document.body.appendChild(el);
       }
 
-      // Re-initialize Webflow interactions
+      // Re-init Webflow interactions
       const w = (window as any).Webflow;
       if (w) {
         try {
@@ -132,10 +134,8 @@ export function WebflowPage({
           // Some pages don't use ix2
         }
       }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [activateScripts, pageScripts]);
+    });
+  }, [pageScripts]);
 
   return (
     <div

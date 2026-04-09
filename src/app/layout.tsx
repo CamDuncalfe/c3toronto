@@ -39,7 +39,7 @@ export default function RootLayout({
         <link href="/css/webflow.css" rel="stylesheet" type="text/css" />
         {/* Splide carousel CSS */}
         <link href="/css/splide.min.css" rel="stylesheet" type="text/css" />
-        {/* Typekit / Adobe Fonts - must load before render */}
+        {/* Typekit / Adobe Fonts */}
         <Script
           src="https://use.typekit.net/bup7jcg.js"
           strategy="beforeInteractive"
@@ -47,19 +47,19 @@ export default function RootLayout({
         <Script id="typekit-load" strategy="beforeInteractive">
           {`try{Typekit.load();}catch(e){}`}
         </Script>
-        {/* jQuery - must load before Webflow and Splide */}
+        {/*
+          Load ALL JS deps as beforeInteractive so they are available
+          when the browser parser hits inline <script> tags in the body.
+          This matches the original Webflow loading order.
+        */}
         <Script src="/js/jquery.min.js" strategy="beforeInteractive" />
+        <Script src="/js/webflow.chunk1.js" strategy="beforeInteractive" />
+        <Script src="/js/webflow.chunk2.js" strategy="beforeInteractive" />
+        <Script src="/js/webflow.main.js" strategy="beforeInteractive" />
+        <Script src="/js/splide.min.js" strategy="beforeInteractive" />
       </head>
       <body>
         {children}
-
-        {/* Webflow JS (depends on jQuery) */}
-        <Script src="/js/webflow.chunk1.js" strategy="afterInteractive" />
-        <Script src="/js/webflow.chunk2.js" strategy="afterInteractive" />
-        <Script src="/js/webflow.main.js" strategy="afterInteractive" />
-
-        {/* Splide carousel JS */}
-        <Script src="/js/splide.min.js" strategy="afterInteractive" />
 
         {/* Podium chat widget */}
         <Script

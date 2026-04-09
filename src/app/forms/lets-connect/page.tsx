@@ -3,12 +3,11 @@ import { WebflowPage } from "@/components/WebflowPage";
 
 export const metadata: Metadata = {
   title: "Let's Connect",
-  description: "Connect with C3 Toronto.",
+  description: "Connect with us.",
 };
 
 const bodyClass = "body";
 const wfPage = "65ad639abeb57c69fef02f38";
-
 const headStyles = `
    #podium-bubble {
       bottom: -18px !important;
@@ -32,7 +31,6 @@ const headStyles = `
      }
    }
 `;
-
 const bodyHtml = `<div data-w-id="c01ebd0c-a5c6-bf1d-d20c-a193caa317f1" class="global"><div class="w-embed"><style>
 /* fluid typography */
 body {
@@ -286,99 +284,53 @@ Think games, worship, creative projects, outdoor fun, splash pads, and tons of l
 
 <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@3.2.2/dist/js/splide.min.js"></script>
 
-<script>
-  /**
- * EASTER 2026 URL REDIRECTOR (Query Param Support)
- * Logic: Between April 2 (5PM) and April 6 (Midnight), swap ChurchCenter 
- * links to Easter versions. Use ?test=true to verify immediately.
- */
-/**
- * EASTER 2026 URL REDIRECTOR (Robust Matching)
- * Logic: Between April 2 (5PM) and April 6 (Midnight), swap links 
- * based on ChurchCenter Form IDs. Use ?test=true to verify.
- */
-document.addEventListener("DOMContentLoaded", function () {
-  
-  const params = new URLSearchParams(window.location.search);
-  const isTestMode = params.get('test') === 'true';
-
-  const startTime = new Date('2026-04-02T17:00:00-04:00'); 
-  const endTime = new Date('2026-04-06T23:59:59-04:00');   
-  const now = new Date();
-
-  // Mapping based on Form IDs to prevent "Trailing Slash" issues
-  const redirects = [
-    { id: '800135', target: 'https://c3toronto.churchcenter.com/people/forms/1190141' }, // Downtown
-    { id: '800261', target: 'https://c3toronto.churchcenter.com/people/forms/1190196' }, // Midtown
-    { id: '800266', target: 'https://c3toronto.churchcenter.com/people/forms/1190197' }  // Hamilton
-  ];
-
-  if (isTestMode || (now >= startTime && now <= endTime)) {
-    if (isTestMode) console.warn("[Easter Redirect] Manual Test Mode Active.");
-
-    const links = document.querySelectorAll('a');
-
-    links.forEach(link => {
-      const currentHref = link.getAttribute('href') || "";
-      
-      // Check if the current link contains any of our target IDs
-      const match = redirects.find(r => currentHref.includes(r.id));
-
-      if (match) {
-        link.setAttribute('href', match.target);
-        console.log(\`[Easter Redirect] Updated Link ID \${match.id} -> \${match.target}\`);
-      }
-    });
-  }
-});
-</script>`;
-
-const pageScripts = `
-  /**
- * EASTER 2026 URL REDIRECTOR (Query Param Support)
- * Logic: Between April 2 (5PM) and April 6 (Midnight), swap ChurchCenter 
- * links to Easter versions. Use ?test=true to verify immediately.
- */
-/**
- * EASTER 2026 URL REDIRECTOR (Robust Matching)
- * Logic: Between April 2 (5PM) and April 6 (Midnight), swap links 
- * based on ChurchCenter Form IDs. Use ?test=true to verify.
- */
-document.addEventListener("DOMContentLoaded", function () {
-  
-  const params = new URLSearchParams(window.location.search);
-  const isTestMode = params.get('test') === 'true';
-
-  const startTime = new Date('2026-04-02T17:00:00-04:00'); 
-  const endTime = new Date('2026-04-06T23:59:59-04:00');   
-  const now = new Date();
-
-  // Mapping based on Form IDs to prevent "Trailing Slash" issues
-  const redirects = [
-    { id: '800135', target: 'https://c3toronto.churchcenter.com/people/forms/1190141' }, // Downtown
-    { id: '800261', target: 'https://c3toronto.churchcenter.com/people/forms/1190196' }, // Midtown
-    { id: '800266', target: 'https://c3toronto.churchcenter.com/people/forms/1190197' }  // Hamilton
-  ];
-
-  if (isTestMode || (now >= startTime && now <= endTime)) {
-    if (isTestMode) console.warn("[Easter Redirect] Manual Test Mode Active.");
-
-    const links = document.querySelectorAll('a');
-
-    links.forEach(link => {
-      const currentHref = link.getAttribute('href') || "";
-      
-      // Check if the current link contains any of our target IDs
-      const match = redirects.find(r => currentHref.includes(r.id));
-
-      if (match) {
-        link.setAttribute('href', match.target);
-        console.log(\`[Easter Redirect] Updated Link ID \${match.id} -> \${match.target}\`);
-      }
-    });
-  }
-});
 `;
+const inlineScripts: string[] = [
+  `/**
+ * EASTER 2026 URL REDIRECTOR (Query Param Support)
+ * Logic: Between April 2 (5PM) and April 6 (Midnight), swap ChurchCenter 
+ * links to Easter versions. Use ?test=true to verify immediately.
+ */
+/**
+ * EASTER 2026 URL REDIRECTOR (Robust Matching)
+ * Logic: Between April 2 (5PM) and April 6 (Midnight), swap links 
+ * based on ChurchCenter Form IDs. Use ?test=true to verify.
+ */
+document.addEventListener("DOMContentLoaded", function () {
+  
+  const params = new URLSearchParams(window.location.search);
+  const isTestMode = params.get('test') === 'true';
+
+  const startTime = new Date('2026-04-02T17:00:00-04:00'); 
+  const endTime = new Date('2026-04-06T23:59:59-04:00');   
+  const now = new Date();
+
+  // Mapping based on Form IDs to prevent "Trailing Slash" issues
+  const redirects = [
+    { id: '800135', target: 'https://c3toronto.churchcenter.com/people/forms/1190141' }, // Downtown
+    { id: '800261', target: 'https://c3toronto.churchcenter.com/people/forms/1190196' }, // Midtown
+    { id: '800266', target: 'https://c3toronto.churchcenter.com/people/forms/1190197' }  // Hamilton
+  ];
+
+  if (isTestMode || (now >= startTime && now <= endTime)) {
+    if (isTestMode) console.warn("[Easter Redirect] Manual Test Mode Active.");
+
+    const links = document.querySelectorAll('a');
+
+    links.forEach(link => {
+      const currentHref = link.getAttribute('href') || "";
+      
+      // Check if the current link contains any of our target IDs
+      const match = redirects.find(r => currentHref.includes(r.id));
+
+      if (match) {
+        link.setAttribute('href', match.target);
+        console.log(\`[Easter Redirect] Updated Link ID \${match.id} -> \${match.target}\`);
+      }
+    });
+  }
+});`
+];
 
 export default function Page() {
   return (
@@ -387,7 +339,7 @@ export default function Page() {
       wfPage={wfPage}
       headStyles={headStyles}
       bodyHtml={bodyHtml}
-      pageScripts={pageScripts}
+      inlineScripts={inlineScripts}
     />
   );
 }

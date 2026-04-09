@@ -3,12 +3,11 @@ import { WebflowPage } from "@/components/WebflowPage";
 
 export const metadata: Metadata = {
   title: "C3 Toronto",
-  description: "We exist to connect people to God. Faith is our means. Hope is our message. Love is our motivation.",
+  description: "We exist to connect people to God.",
 };
 
 const bodyClass = "body home";
 const wfPage = "644dc19729bd36638e2be3e1";
-
 const headStyles = `
    #podium-bubble {
       bottom: -18px !important;
@@ -82,7 +81,6 @@ const headStyles = `
       display: block !important;
   }
 `;
-
 const bodyHtml = `<a data-w-id="c5859d09-36ed-3c30-0260-f539c1c7a937" style="display:none" href="#" class="audio_btn w-button">Unmute</a><div data-w-id="c01ebd0c-a5c6-bf1d-d20c-a193caa317f1" class="global"><div class="w-embed"><style>
 /* fluid typography */
 body {
@@ -340,359 +338,182 @@ Your browser does not support the video tag.
 
 <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@3.2.2/dist/js/splide.min.js"></script>
 
-<script>
-document.querySelector('.audio_btn').addEventListener('click', function() {
-    var video = document.getElementById('bgvideo');
-    var button = this;
-    
-    if (video.muted) {
-        video.muted = false;
-        button.textContent = 'Mute';
-    } else {
-        video.muted = true;
-        button.textContent = 'Unmute';
-    }
-});
-</script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  let splides = $('.slider1');
-  for (let i = 0; i < splides.length; i++) {
-    new Splide(splides[i], {
-      type: 'slide',
-      gap: '2em',
-      arrows: false,
-      pagination: true,
-      speed: 600,
-      dragAngleThreshold: 30,
-      autoWidth: true,
-      rewind: false,
-      rewindSpeed: 400,
-      waitForTransition: false,
-      updateOnMove: true,
-      trimSpace: true
-    }).mount();
-  }
-});
-</script>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-  /* // --- ORIGINAL IMPLEMENTATION (Commented Out) ---
-  // Note: This version had a 'return' outside a function error 
-  // and used destructive DOM removal.
-
-  var sundayContent = document.querySelector(".sunday-content");
-  var weekdayContent = document.querySelector(".weekday-content");
-  var prayerContent = document.querySelector(".prayer-content");
-  var now = new Date();
-  var dayOfWeek = now.getDay(); 
-
-  function removeElement(element) {
-    if (element && element.parentNode) {
-      element.parentNode.removeChild(element);
-    }
-  }
-
-  function isTimeInRange(startHour, startMinute, endHour, endMinute) {
-    var start = new Date();
-    start.setHours(startHour, startMinute, 0, 0);
-    var end = new Date();
-    end.setHours(endHour, endMinute, 0, 0);
-    return now >= start && now <= end;
-  }
-
-  if (dayOfWeek === 0) {
-    removeElement(prayerContent);
-    removeElement(weekdayContent);
-    return;
-  }
-
-  if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-    if (isTimeInRange(5, 0, 7, 0)) {
-      removeElement(sundayContent);
-      removeElement(weekdayContent);
-    } else {
-      removeElement(sundayContent);
-      removeElement(prayerContent);
-    }
-    return;
-  }
-
-  if (dayOfWeek === 6) {
-    if (isTimeInRange(9, 0, 10, 0)) {
-      removeElement(sundayContent);
-      removeElement(weekdayContent);
-    } else {
-      removeElement(sundayContent);
-      removeElement(prayerContent);
-    }
-    return;
-  }
-  */
-
-  // --- NEW IMPLEMENTATION (Timezone-Aware & Non-Destructive) ---
-  const Scheduler = {
-    // State Guard: Tracks what is currently visible
-    currentActive: null,
-
-    elements: {
-      sunday: document.querySelector(".sunday-content"),
-      weekday: document.querySelector(".weekday-content"),
-      prayer: document.querySelector(".prayer-content")
-    },
-
-    getTorontoContext() {
-      const params = new URLSearchParams(window.location.search);
-      let now = new Date();
-
-      if (params.has('day')) {
-        now.setDate(now.getDate() + (parseInt(params.get('day')) - now.getDay()));
-      }
-      if (params.has('time')) {
-        const [hrs, mins] = params.get('time').split(':');
-        now.setHours(parseInt(hrs), parseInt(mins), 0);
-      }
-
-      const formatter = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'America/Toronto',
-        weekday: 'short',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      });
-
-      const parts = formatter.formatToParts(now);
-      const getPart = (type) => parts.find(p => p.type === type)?.value;
-
-      const days = { 'Sun': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6 };
-      const day = days[getPart('weekday')];
-      const hour = parseInt(getPart('hour'));
-      const minute = parseInt(getPart('minute'));
-
-      return {
-        day: day,
-        totalMinutes: hour * 60 + minute
-      };
-    },
-
-    update() {
-      const ctx = this.getTorontoContext();
-      let activeKey = "weekday";
-
-      // 1. Determine Logic
-      if (ctx.day === 0) {
-        activeKey = "sunday";
-      } else if (ctx.day >= 1 && ctx.day <= 5) {
-        activeKey = (ctx.totalMinutes >= 300 && ctx.totalMinutes < 420) ? "prayer" : "weekday";
-      } else if (ctx.day === 6) {
-        activeKey = (ctx.totalMinutes >= 540 && ctx.totalMinutes < 600) ? "prayer" : "weekday";
-      }
-
-      // 2. State Guard: If the section hasn't changed, do nothing.
-      if (activeKey === this.currentActive) return;
-      
-      console.log(\`[Scheduler] State changed to: \${activeKey}\`);
-      this.currentActive = activeKey;
-      this.render(activeKey);
-    },
-
-    render(activeKey) {
-      Object.keys(this.elements).forEach(key => {
-        const el = this.elements[key];
-        if (el) {
-          el.classList.toggle("is-active", key === activeKey);
-        }
-      });
-    },
-
-    init() {
-      this.update();
-      // Optimization: Increased to 60 seconds (60000ms)
-      setInterval(() => this.update(), 60000);
-    }
-  };
-
-  Scheduler.init();
-});
-</script>`;
-
-const pageScripts = `
-document.querySelector('.audio_btn').addEventListener('click', function() {
-    var video = document.getElementById('bgvideo');
-    var button = this;
-    
-    if (video.muted) {
-        video.muted = false;
-        button.textContent = 'Mute';
-    } else {
-        video.muted = true;
-        button.textContent = 'Unmute';
-    }
-});
 
 
-document.addEventListener('DOMContentLoaded', function () {
-  let splides = $('.slider1');
-  for (let i = 0; i < splides.length; i++) {
-    new Splide(splides[i], {
-      type: 'slide',
-      gap: '2em',
-      arrows: false,
-      pagination: true,
-      speed: 600,
-      dragAngleThreshold: 30,
-      autoWidth: true,
-      rewind: false,
-      rewindSpeed: 400,
-      waitForTransition: false,
-      updateOnMove: true,
-      trimSpace: true
-    }).mount();
-  }
-});
 
 
-  document.addEventListener("DOMContentLoaded", function () {
-  /* // --- ORIGINAL IMPLEMENTATION (Commented Out) ---
-  // Note: This version had a 'return' outside a function error 
-  // and used destructive DOM removal.
-
-  var sundayContent = document.querySelector(".sunday-content");
-  var weekdayContent = document.querySelector(".weekday-content");
-  var prayerContent = document.querySelector(".prayer-content");
-  var now = new Date();
-  var dayOfWeek = now.getDay(); 
-
-  function removeElement(element) {
-    if (element && element.parentNode) {
-      element.parentNode.removeChild(element);
-    }
-  }
-
-  function isTimeInRange(startHour, startMinute, endHour, endMinute) {
-    var start = new Date();
-    start.setHours(startHour, startMinute, 0, 0);
-    var end = new Date();
-    end.setHours(endHour, endMinute, 0, 0);
-    return now >= start && now <= end;
-  }
-
-  if (dayOfWeek === 0) {
-    removeElement(prayerContent);
-    removeElement(weekdayContent);
-    return;
-  }
-
-  if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-    if (isTimeInRange(5, 0, 7, 0)) {
-      removeElement(sundayContent);
-      removeElement(weekdayContent);
-    } else {
-      removeElement(sundayContent);
-      removeElement(prayerContent);
-    }
-    return;
-  }
-
-  if (dayOfWeek === 6) {
-    if (isTimeInRange(9, 0, 10, 0)) {
-      removeElement(sundayContent);
-      removeElement(weekdayContent);
-    } else {
-      removeElement(sundayContent);
-      removeElement(prayerContent);
-    }
-    return;
-  }
-  */
-
-  // --- NEW IMPLEMENTATION (Timezone-Aware & Non-Destructive) ---
-  const Scheduler = {
-    // State Guard: Tracks what is currently visible
-    currentActive: null,
-
-    elements: {
-      sunday: document.querySelector(".sunday-content"),
-      weekday: document.querySelector(".weekday-content"),
-      prayer: document.querySelector(".prayer-content")
-    },
-
-    getTorontoContext() {
-      const params = new URLSearchParams(window.location.search);
-      let now = new Date();
-
-      if (params.has('day')) {
-        now.setDate(now.getDate() + (parseInt(params.get('day')) - now.getDay()));
-      }
-      if (params.has('time')) {
-        const [hrs, mins] = params.get('time').split(':');
-        now.setHours(parseInt(hrs), parseInt(mins), 0);
-      }
-
-      const formatter = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'America/Toronto',
-        weekday: 'short',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      });
-
-      const parts = formatter.formatToParts(now);
-      const getPart = (type) => parts.find(p => p.type === type)?.value;
-
-      const days = { 'Sun': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6 };
-      const day = days[getPart('weekday')];
-      const hour = parseInt(getPart('hour'));
-      const minute = parseInt(getPart('minute'));
-
-      return {
-        day: day,
-        totalMinutes: hour * 60 + minute
-      };
-    },
-
-    update() {
-      const ctx = this.getTorontoContext();
-      let activeKey = "weekday";
-
-      // 1. Determine Logic
-      if (ctx.day === 0) {
-        activeKey = "sunday";
-      } else if (ctx.day >= 1 && ctx.day <= 5) {
-        activeKey = (ctx.totalMinutes >= 300 && ctx.totalMinutes < 420) ? "prayer" : "weekday";
-      } else if (ctx.day === 6) {
-        activeKey = (ctx.totalMinutes >= 540 && ctx.totalMinutes < 600) ? "prayer" : "weekday";
-      }
-
-      // 2. State Guard: If the section hasn't changed, do nothing.
-      if (activeKey === this.currentActive) return;
-      
-      console.log(\`[Scheduler] State changed to: \${activeKey}\`);
-      this.currentActive = activeKey;
-      this.render(activeKey);
-    },
-
-    render(activeKey) {
-      Object.keys(this.elements).forEach(key => {
-        const el = this.elements[key];
-        if (el) {
-          el.classList.toggle("is-active", key === activeKey);
-        }
-      });
-    },
-
-    init() {
-      this.update();
-      // Optimization: Increased to 60 seconds (60000ms)
-      setInterval(() => this.update(), 60000);
-    }
-  };
-
-  Scheduler.init();
-});
 `;
+const inlineScripts: string[] = [
+  `document.querySelector('.audio_btn').addEventListener('click', function() {
+    var video = document.getElementById('bgvideo');
+    var button = this;
+    
+    if (video.muted) {
+        video.muted = false;
+        button.textContent = 'Mute';
+    } else {
+        video.muted = true;
+        button.textContent = 'Unmute';
+    }
+});`,
+  `document.addEventListener('DOMContentLoaded', function () {
+  let splides = $('.slider1');
+  for (let i = 0; i < splides.length; i++) {
+    new Splide(splides[i], {
+      type: 'slide',
+      gap: '2em',
+      arrows: false,
+      pagination: true,
+      speed: 600,
+      dragAngleThreshold: 30,
+      autoWidth: true,
+      rewind: false,
+      rewindSpeed: 400,
+      waitForTransition: false,
+      updateOnMove: true,
+      trimSpace: true
+    }).mount();
+  }
+});`,
+  `document.addEventListener("DOMContentLoaded", function () {
+  /* // --- ORIGINAL IMPLEMENTATION (Commented Out) ---
+  // Note: This version had a 'return' outside a function error 
+  // and used destructive DOM removal.
+
+  var sundayContent = document.querySelector(".sunday-content");
+  var weekdayContent = document.querySelector(".weekday-content");
+  var prayerContent = document.querySelector(".prayer-content");
+  var now = new Date();
+  var dayOfWeek = now.getDay(); 
+
+  function removeElement(element) {
+    if (element && element.parentNode) {
+      element.parentNode.removeChild(element);
+    }
+  }
+
+  function isTimeInRange(startHour, startMinute, endHour, endMinute) {
+    var start = new Date();
+    start.setHours(startHour, startMinute, 0, 0);
+    var end = new Date();
+    end.setHours(endHour, endMinute, 0, 0);
+    return now >= start && now <= end;
+  }
+
+  if (dayOfWeek === 0) {
+    removeElement(prayerContent);
+    removeElement(weekdayContent);
+    return;
+  }
+
+  if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+    if (isTimeInRange(5, 0, 7, 0)) {
+      removeElement(sundayContent);
+      removeElement(weekdayContent);
+    } else {
+      removeElement(sundayContent);
+      removeElement(prayerContent);
+    }
+    return;
+  }
+
+  if (dayOfWeek === 6) {
+    if (isTimeInRange(9, 0, 10, 0)) {
+      removeElement(sundayContent);
+      removeElement(weekdayContent);
+    } else {
+      removeElement(sundayContent);
+      removeElement(prayerContent);
+    }
+    return;
+  }
+  */
+
+  // --- NEW IMPLEMENTATION (Timezone-Aware & Non-Destructive) ---
+  const Scheduler = {
+    // State Guard: Tracks what is currently visible
+    currentActive: null,
+
+    elements: {
+      sunday: document.querySelector(".sunday-content"),
+      weekday: document.querySelector(".weekday-content"),
+      prayer: document.querySelector(".prayer-content")
+    },
+
+    getTorontoContext() {
+      const params = new URLSearchParams(window.location.search);
+      let now = new Date();
+
+      if (params.has('day')) {
+        now.setDate(now.getDate() + (parseInt(params.get('day')) - now.getDay()));
+      }
+      if (params.has('time')) {
+        const [hrs, mins] = params.get('time').split(':');
+        now.setHours(parseInt(hrs), parseInt(mins), 0);
+      }
+
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Toronto',
+        weekday: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+
+      const parts = formatter.formatToParts(now);
+      const getPart = (type) => parts.find(p => p.type === type)?.value;
+
+      const days = { 'Sun': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6 };
+      const day = days[getPart('weekday')];
+      const hour = parseInt(getPart('hour'));
+      const minute = parseInt(getPart('minute'));
+
+      return {
+        day: day,
+        totalMinutes: hour * 60 + minute
+      };
+    },
+
+    update() {
+      const ctx = this.getTorontoContext();
+      let activeKey = "weekday";
+
+      // 1. Determine Logic
+      if (ctx.day === 0) {
+        activeKey = "sunday";
+      } else if (ctx.day >= 1 && ctx.day <= 5) {
+        activeKey = (ctx.totalMinutes >= 300 && ctx.totalMinutes < 420) ? "prayer" : "weekday";
+      } else if (ctx.day === 6) {
+        activeKey = (ctx.totalMinutes >= 540 && ctx.totalMinutes < 600) ? "prayer" : "weekday";
+      }
+
+      // 2. State Guard: If the section hasn't changed, do nothing.
+      if (activeKey === this.currentActive) return;
+      
+      console.log(\`[Scheduler] State changed to: \${activeKey}\`);
+      this.currentActive = activeKey;
+      this.render(activeKey);
+    },
+
+    render(activeKey) {
+      Object.keys(this.elements).forEach(key => {
+        const el = this.elements[key];
+        if (el) {
+          el.classList.toggle("is-active", key === activeKey);
+        }
+      });
+    },
+
+    init() {
+      this.update();
+      // Optimization: Increased to 60 seconds (60000ms)
+      setInterval(() => this.update(), 60000);
+    }
+  };
+
+  Scheduler.init();
+});`
+];
 
 export default function Page() {
   return (
@@ -701,7 +522,7 @@ export default function Page() {
       wfPage={wfPage}
       headStyles={headStyles}
       bodyHtml={bodyHtml}
-      pageScripts={pageScripts}
+      inlineScripts={inlineScripts}
     />
   );
 }

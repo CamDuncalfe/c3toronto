@@ -3,12 +3,11 @@ import { WebflowPage } from "@/components/WebflowPage";
 
 export const metadata: Metadata = {
   title: "Women",
-  description: "Women's ministry at C3 Toronto.",
+  description: "Women's ministry.",
 };
 
 const bodyClass = "body";
 const wfPage = "645b6e8ae21090ce8f6e8d35";
-
 const headStyles = `
    #podium-bubble {
       bottom: -18px !important;
@@ -32,7 +31,6 @@ const headStyles = `
      }
    }
 `;
-
 const bodyHtml = `<div data-w-id="c01ebd0c-a5c6-bf1d-d20c-a193caa317f1" class="global"><div class="w-embed"><style>
 /* fluid typography */
 body {
@@ -332,8 +330,12 @@ Your browser does not support the video tag.
 
 <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@3.2.2/dist/js/splide.min.js"></script>
 
-<script>
-(function ($) {
+
+
+
+`;
+const inlineScripts: string[] = [
+  `(function ($) {
   $.fn.shuffle = function () {
     var allElems = this.get(),
       getRandom = function (max) {
@@ -354,12 +356,8 @@ Your browser does not support the video tag.
   };
 })(jQuery);
 
-$(".splide__slide").shuffle();
-</script>
-
-<script>
-
-function card_slider() {
+$(".splide__slide").shuffle();`,
+  `function card_slider() {
 
 let splides = $('.card_slider');
 for ( let i = 0, splideLength = splides.length; i < splideLength; i++ ) {
@@ -395,76 +393,8 @@ for ( let i = 0, splideLength = splides.length; i < splideLength; i++ ) {
 }
 
 }
-card_slider();
-
-</script>
-`;
-
-const pageScripts = `
-(function ($) {
-  $.fn.shuffle = function () {
-    var allElems = this.get(),
-      getRandom = function (max) {
-        return Math.floor(Math.random() * max);
-      },
-      shuffled = $.map(allElems, function () {
-        var random = getRandom(allElems.length),
-          randEl = $(allElems[random]).clone(true)[0];
-        allElems.splice(random, 1);
-        return randEl;
-      });
-
-    this.each(function (i) {
-      $(this).replaceWith($(shuffled[i]));
-    });
-
-    return $(shuffled);
-  };
-})(jQuery);
-
-$(".splide__slide").shuffle();
-
-
-
-function card_slider() {
-
-let splides = $('.card_slider');
-for ( let i = 0, splideLength = splides.length; i < splideLength; i++ ) {
-	new Splide( splides[ i ], {
-  // Desktop on down
-  perPage: 4,
-	perMove: 1,
-  focus: 0, // 0 = left and 'center' = center
-  type: 'slide', // 'loop' or 'slide'
-  gap: '2em', // space between slides
-  arrows: 'true', // 'slider' or false
-  pagination: 'slider', // 'slider' or false
-  speed : 600, // transition speed in miliseconds
-  dragAngleThreshold: 30, // default is 30
-  autoWidth: false, // for cards with differing widths
-  rewind : false, // go back to beginning when reach end
-  rewindSpeed : 400,
-  waitForTransition : false,
-  updateOnMove : true,
-  trimSpace: true, // true removes empty space from end of list
-  breakpoints: {
-		991: {
-    	// Tablet
-		},
-    767: {
-    	// Mobile Landscape
-		},
-    479: {
-    	// Mobile Portrait
-		}
-	}
-} ).mount();
-}
-
-}
-card_slider();
-
-`;
+card_slider();`
+];
 
 export default function Page() {
   return (
@@ -473,7 +403,7 @@ export default function Page() {
       wfPage={wfPage}
       headStyles={headStyles}
       bodyHtml={bodyHtml}
-      pageScripts={pageScripts}
+      inlineScripts={inlineScripts}
     />
   );
 }

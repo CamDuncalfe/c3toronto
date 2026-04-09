@@ -3,12 +3,11 @@ import { WebflowPage } from "@/components/WebflowPage";
 
 export const metadata: Metadata = {
   title: "Connect Groups",
-  description: "Find a Connect Group at C3 Toronto.",
+  description: "Find a group.",
 };
 
 const bodyClass = "body";
 const wfPage = "645303c390623555a1251036";
-
 const headStyles = `
    #podium-bubble {
       bottom: -18px !important;
@@ -32,7 +31,6 @@ const headStyles = `
      }
    }
 `;
-
 const bodyHtml = `<div data-w-id="c01ebd0c-a5c6-bf1d-d20c-a193caa317f1" class="global"><div class="w-embed"><style>
 /* fluid typography */
 body {
@@ -286,19 +284,15 @@ Think games, worship, creative projects, outdoor fun, splash pads, and tons of l
 
 <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@3.2.2/dist/js/splide.min.js"></script>
 
- <script> var cards = $(".cg_cards_grid_wrap .card_wrap");
+ `;
+const inlineScripts: string[] = [
+  `var cards = $(".cg_cards_grid_wrap .card_wrap");
 for(var i = 0; i < cards.length; i++){
     var target = Math.floor(Math.random() * cards.length -1) + 1;
     var target2 = Math.floor(Math.random() * cards.length -1) +1;
     cards.eq(target).before(cards.eq(target2));
-} </script>`;
-
-const pageScripts = ` var cards = $(".cg_cards_grid_wrap .card_wrap");
-for(var i = 0; i < cards.length; i++){
-    var target = Math.floor(Math.random() * cards.length -1) + 1;
-    var target2 = Math.floor(Math.random() * cards.length -1) +1;
-    cards.eq(target).before(cards.eq(target2));
-} `;
+}`
+];
 
 export default function Page() {
   return (
@@ -307,7 +301,7 @@ export default function Page() {
       wfPage={wfPage}
       headStyles={headStyles}
       bodyHtml={bodyHtml}
-      pageScripts={pageScripts}
+      inlineScripts={inlineScripts}
     />
   );
 }

@@ -3,12 +3,11 @@ import { WebflowPage } from "@/components/WebflowPage";
 
 export const metadata: Metadata = {
   title: "C3 Kids",
-  description: "Children's ministry at C3 Toronto.",
+  description: "Children's ministry.",
 };
 
 const bodyClass = "body";
 const wfPage = "645303efdcff962cb5fc7eef";
-
 const headStyles = `
    #podium-bubble {
       bottom: -18px !important;
@@ -32,7 +31,6 @@ const headStyles = `
      }
    }
 `;
-
 const bodyHtml = `<div data-w-id="c01ebd0c-a5c6-bf1d-d20c-a193caa317f1" class="global"><div class="w-embed"><style>
 /* fluid typography */
 body {
@@ -317,89 +315,46 @@ Think games, worship, creative projects, outdoor fun, splash pads, and tons of l
 <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@3.2.2/dist/js/splide.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@3.2.2/dist/js/splide.min.js"></script>
-<script>
-
-function card_slider() {
-
-let splides = $('.card_slider');
-for ( let i = 0, splideLength = splides.length; i < splideLength; i++ ) {
-	new Splide( splides[ i ], {
-  // Desktop on down
-  perPage: 4,
-	perMove: 1,
-  focus: 0, // 0 = left and 'center' = center
-  type: 'slide', // 'loop' or 'slide'
-  gap: '2em', // space between slides
-  arrows: 'true', // 'slider' or false
-  pagination: 'slider', // 'slider' or false
-  speed : 600, // transition speed in miliseconds
-  dragAngleThreshold: 30, // default is 30
-  autoWidth: false, // for cards with differing widths
-  rewind : false, // go back to beginning when reach end
-  rewindSpeed : 400,
-  waitForTransition : false,
-  updateOnMove : true,
-  trimSpace: true, // true removes empty space from end of list
-  breakpoints: {
-		991: {
-    	 perPage: 3,
-		},
-    767: {
-    	 perPage: 2,
-		},
-    479: {
-    	 perPage: 1,
-		}
-	}
-} ).mount();
-}
-
-}
-card_slider();
-
-</script>`;
-
-const pageScripts = `
-
-function card_slider() {
-
-let splides = $('.card_slider');
-for ( let i = 0, splideLength = splides.length; i < splideLength; i++ ) {
-	new Splide( splides[ i ], {
-  // Desktop on down
-  perPage: 4,
-	perMove: 1,
-  focus: 0, // 0 = left and 'center' = center
-  type: 'slide', // 'loop' or 'slide'
-  gap: '2em', // space between slides
-  arrows: 'true', // 'slider' or false
-  pagination: 'slider', // 'slider' or false
-  speed : 600, // transition speed in miliseconds
-  dragAngleThreshold: 30, // default is 30
-  autoWidth: false, // for cards with differing widths
-  rewind : false, // go back to beginning when reach end
-  rewindSpeed : 400,
-  waitForTransition : false,
-  updateOnMove : true,
-  trimSpace: true, // true removes empty space from end of list
-  breakpoints: {
-		991: {
-    	 perPage: 3,
-		},
-    767: {
-    	 perPage: 2,
-		},
-    479: {
-    	 perPage: 1,
-		}
-	}
-} ).mount();
-}
-
-}
-card_slider();
-
 `;
+const inlineScripts: string[] = [
+  `function card_slider() {
+
+let splides = $('.card_slider');
+for ( let i = 0, splideLength = splides.length; i < splideLength; i++ ) {
+	new Splide( splides[ i ], {
+  // Desktop on down
+  perPage: 4,
+	perMove: 1,
+  focus: 0, // 0 = left and 'center' = center
+  type: 'slide', // 'loop' or 'slide'
+  gap: '2em', // space between slides
+  arrows: 'true', // 'slider' or false
+  pagination: 'slider', // 'slider' or false
+  speed : 600, // transition speed in miliseconds
+  dragAngleThreshold: 30, // default is 30
+  autoWidth: false, // for cards with differing widths
+  rewind : false, // go back to beginning when reach end
+  rewindSpeed : 400,
+  waitForTransition : false,
+  updateOnMove : true,
+  trimSpace: true, // true removes empty space from end of list
+  breakpoints: {
+		991: {
+    	 perPage: 3,
+		},
+    767: {
+    	 perPage: 2,
+		},
+    479: {
+    	 perPage: 1,
+		}
+	}
+} ).mount();
+}
+
+}
+card_slider();`
+];
 
 export default function Page() {
   return (
@@ -408,7 +363,7 @@ export default function Page() {
       wfPage={wfPage}
       headStyles={headStyles}
       bodyHtml={bodyHtml}
-      pageScripts={pageScripts}
+      inlineScripts={inlineScripts}
     />
   );
 }

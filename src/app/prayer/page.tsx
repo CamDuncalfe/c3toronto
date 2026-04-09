@@ -3,12 +3,11 @@ import { WebflowPage } from "@/components/WebflowPage";
 
 export const metadata: Metadata = {
   title: "Weekly Prayer",
-  description: "Join us for weekly prayer at C3 Toronto.",
+  description: "Weekly prayer.",
 };
 
 const bodyClass = "body";
 const wfPage = "645303cf58368b03de9dfd9a";
-
 const headStyles = `
    #podium-bubble {
       bottom: -18px !important;
@@ -32,7 +31,6 @@ const headStyles = `
      }
    }
 `;
-
 const bodyHtml = `<div data-w-id="c01ebd0c-a5c6-bf1d-d20c-a193caa317f1" class="global"><div class="w-embed"><style>
 /* fluid typography */
 body {
@@ -287,8 +285,7 @@ Think games, worship, creative projects, outdoor fun, splash pads, and tons of l
 <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@3.2.2/dist/js/splide.min.js"></script>
 
 `;
-
-const pageScripts = ``;
+const inlineScripts: string[] = [];
 
 export default function Page() {
   return (
@@ -297,7 +294,7 @@ export default function Page() {
       wfPage={wfPage}
       headStyles={headStyles}
       bodyHtml={bodyHtml}
-      pageScripts={pageScripts}
+      inlineScripts={inlineScripts}
     />
   );
 }
